@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard – O‘quv Markaz (ULTRA PRO)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 overflow-hidden">
+
+<!-- LOGIN -->
+<div id="loginPage" class="min-h-screen flex items-center justify-center">
+  <div class="bg-white p-8 rounded-2xl shadow-xl w-[360px] animate-fade-in">
+    <h2 class="text-2xl font-bold text-center mb-6">🔐 Admin Kirish</h2>
+    <input id="phone" placeholder="Telefon" class="input" />
+    <input id="password" type="password" placeholder="Parol" class="input" />
+    <button onclick="login()" class="btn-primary w-full">Kirish</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden h-screen flex">
+
+  <!-- ASIDE -->
+  <aside class="w-64 bg-slate-900 text-white p-5 flex flex-col">
+    <h1 class="text-xl font-bold mb-6">🏫 Admin CRM</h1>
+    <button onclick="showPage('stats')" class="menu">📊 Dashboard</button>
+    <button onclick="showPage('teachers')" class="menu">👨‍🏫 O‘qituvchilar</button>
+    <button onclick="showPage('students')" class="menu">👥 O‘quvchilar</button>
+    <button onclick="showPage('groups')" class="menu">📚 Guruhlar</button>
+    <button onclick="showPage('topStudents')" class="menu">🏆 Top O‘quvchilar</button>
+    <button onclick="logout()" class="menu bg-red-600 mt-auto">🚪 Chiqish</button>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="flex-1 p-6 overflow-y-auto">
+
+    <!-- STATS -->
+    <section id="stats" class="page">
+      <h2 class="title">📊 Umumiy holat</h2>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="card hover-card">👨‍🏫 O‘qituvchilar: <b id="stTeachers"></b></div>
+        <div class="card hover-card">👥 O‘quvchilar: <b id="stStudents"></b></div>
+        <div class="card hover-card">📚 Guruhlar: <b id="stGroups"></b></div>
+      </div>
+    </section>
+
+    <!-- TEACHERS -->
+    <section id="teachers" class="page hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="title">👨‍🏫 O‘qituvchilar</h2>
+        <button onclick="openTeacherModal()" class="btn-primary">➕ Qo‘shish</button>
+      </div>
+      <input id="teacherSearch" oninput="renderTeachers()" placeholder="Qidiruv..." class="input max-w-sm mb-4" />
+      <div id="teacherList" class="grid md:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- STUDENTS -->
+    <section id="students" class="page hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="title">👥 O‘quvchilar</h2>
+        <button onclick="openStudentModal()" class="btn-primary">➕ Qo‘shish</button>
+      </div>
+      <input id="studentSearch" oninput="renderStudents(1)" placeholder="Ism / o‘qituvchi bo‘yicha qidiruv..." class="input max-w-md mb-4" />
+      <div id="studentList" class="grid md:grid-cols-2 gap-4"></div>
+      <div class="flex justify-center items-center gap-2 mt-6">
+        <button onclick="prevPage()" class="btn-gray">⬅ Oldingi</button>
+        <span id="pageInfo" class="text-sm"></span>
+        <button onclick="nextPage()" class="btn-gray">Keyingi ➡</button>
+      </div>
+    </section>
+
+    <!-- GROUPS -->
+    <section id="groups" class="page hidden">
+      <h2 class="title">📚 Guruhlar</h2>
+      <div id="groupList" class="grid md:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- TOP STUDENTS -->
+    <section id="topStudents" class="page hidden">
+      <h2 class="title">🏆 Eng ko‘p ball olganlar</h2>
+      <div id="topList" class="grid md:grid-cols-2 gap-4"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- STUDENT MODAL -->
+<div id="studentModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center">
+  <div class="bg-white p-6 rounded-xl w-[350px] animate-fade-in">
+    <h3 class="font-bold mb-4">➕ O‘quvchi qo‘shish</h3>
+    <input id="sName" placeholder="Ism" class="input" />
+    <select id="sTeacher" class="input"></select>
+    <div class="flex gap-2">
+      <button onclick="addStudent()" class="btn-primary w-full">Saqlash</button>
+      <button onclick="closeStudentModal()" class="btn-gray w-full">Bekor</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEACHER MODAL -->
+<div id="teacherModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center">
+  <div class="bg-white p-6 rounded-xl w-[350px] animate-fade-in">
+    <h3 class="font-bold mb-4">➕ O‘qituvchi qo‘shish</h3>
+    <input id="tName" placeholder="Ism" class="input" />
+    <input id="tSurname" placeholder="Familiya" class="input" />
+    <input id="tGroup" placeholder="Yo‘nalish" class="input" />
+    <div class="flex gap-2">
+      <button onclick="addTeacher()" class="btn-primary w-full">Saqlash</button>
+      <button onclick="closeTeacherModal()" class="btn-gray w-full">Bekor</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.input{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;margin-bottom:10px}
+.btn-primary{background:#2563eb;color:#fff;padding:10px;border-radius:8px}
+.btn-gray{background:#e5e7eb;padding:10px;border-radius:8px}
+.menu{padding:10px;border-radius:8px;margin-bottom:6px;transition:.3s}
+.menu:hover{background:#334155}
+.card{background:white;padding:16px;border-radius:16px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+.hover-card{transition:.3s}
+.hover-card:hover{transform:translateY(-4px);box-shadow:0 10px 20px rgba(0,0,0,.15)}
+.title{font-size:24px;font-weight:700;margin-bottom:12px}
+.animate-fade-in{animation:fade .4s ease}
+@keyframes fade{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+</style>
+
+<script>
+const ADMIN_PHONE='998901234567'
+const ADMIN_PASS=' '
+let teachers=JSON.parse(localStorage.getItem('teachers'))||[]
+let students=JSON.parse(localStorage.getItem('students'))||[]
+
+function login(){
+  if(phone.value===ADMIN_PHONE && password.value===ADMIN_PASS){
+    loginPage.classList.add('hidden');
+    dashboard.classList.remove('hidden');
+    renderAll();
+  } else alert('Login xato');
+}
+function logout(){location.reload()}
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+// TEACHER MODAL
+function openTeacherModal(){teacherModal.classList.remove('hidden');teacherModal.classList.add('flex')}
+function closeTeacherModal(){teacherModal.classList.add('hidden')}
+function addTeacher(){
+  teachers.push({id:Date.now(),name:tName.value,surname:tSurname.value,group:tGroup.value});
+  localStorage.setItem('teachers',JSON.stringify(teachers));
+  closeTeacherModal();
+  renderAll();
+}
+
+// STUDENT MODAL
+function openStudentModal(){studentModal.classList.remove('hidden');studentModal.classList.add('flex');renderTeacherOptions()}
+function closeStudentModal(){studentModal.classList.add('hidden')}
+function addStudent(){
+  students.push({id:Date.now(),name:sName.value,teacher:sTeacher.value,score:0});
+  localStorage.setItem('students',JSON.stringify(students));
+  closeStudentModal();
+  renderAll();
+}
+
+// RENDER FUNCTIONS
+function renderAll(){
+  renderTeachers();
+  renderStudents();
+  renderGroups();
+  updateStats();
+  renderTopStudents();
+}
+function renderTeachers(){
+  teacherList.innerHTML='';
+  const q = teacherSearch.value.toLowerCase();
+  teachers.filter(t => `${t.name} ${t.surname}`.toLowerCase().includes(q)).forEach(t=>{
+    teacherList.innerHTML+=`<div class="card hover-card"><b>${t.name} ${t.surname}</b><p>${t.group}</p></div>`;
+  })
+}
+let currentPage = 1;
+const PER_PAGE = 15;
+
+function renderStudents(page = currentPage){
+  currentPage = page;
+  studentList.innerHTML='';
+  const q = studentSearch.value.toLowerCase();
+  const filtered = students.filter(s =>
+    s.name.toLowerCase().includes(q) ||
+    s.teacher.toLowerCase().includes(q)
+  );
+  const start = (currentPage - 1) * PER_PAGE;
+  const pageItems = filtered.slice(start, start + PER_PAGE);
+  pageItems.forEach((s,index)=>{
+    const realIndex = students.indexOf(s);
+    studentList.innerHTML+=`
+      <div class="card hover-card flex justify-between items-center">
+        <div>
+          <b>${s.name}</b>
+          <p class="text-sm text-gray-500">${s.teacher}</p>
+          <p class="text-sm text-yellow-500">Ball: ${s.score || 0}</p>
+        </div>
+        <div class="flex flex-col gap-1">
+          <input type="number" placeholder="Ball" id="scoreInput${s.id}" class="input" />
+          <button onclick="addScore(${s.id}, Number(document.getElementById('scoreInput${s.id}').value))" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition">Baholash</button>
+          <button onclick="deleteStudent(${realIndex})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition">O‘chirish</button>
+        </div>
+      </div>`;
+  });
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+  pageInfo.innerText = `Sahifa ${currentPage} / ${totalPages}`;
+}
+function deleteStudent(index){
+  students.splice(index,1);
+  localStorage.setItem('students',JSON.stringify(students));
+  renderAll();
+}
+function nextPage(){
+  const q = studentSearch.value.toLowerCase();
+  const total = students.filter(s =>
+    s.name.toLowerCase().includes(q) || s.teacher.toLowerCase().includes(q)
+  ).length;
+  if(currentPage * PER_PAGE < total){currentPage++; renderStudents();}
+}
+function prevPage(){
+  if(currentPage>1){currentPage--; renderStudents();}
+}
+
+// GROUPS
+function renderGroups(){
+  groupList.innerHTML='';
+  [...new Set(teachers.map(t=>t.group))].forEach(g=>{
+    groupList.innerHTML+=`<div class="card hover-card">${g}</div>`;
+  })
+}
+
+// STATS
+function updateStats(){
+  stTeachers.innerText=teachers.length;
+  stStudents.innerText=students.length;
+  stGroups.innerText=[...new Set(teachers.map(t=>t.group))].length;
+}
+
+// TEACHER OPTIONS FOR STUDENT MODAL
+function renderTeacherOptions(){
+  sTeacher.innerHTML='';
+  teachers.forEach(t=>sTeacher.innerHTML+=`<option>${t.name} ${t.surname}</option>`);
+}
+
+// ADD SCORE
+function addScore(studentId, score){
+  const student = students.find(s=>s.id===studentId);
+  if(student){student.score=score; localStorage.setItem('students',JSON.stringify(students)); renderStudents(); renderTopStudents();}
+}
+
+// TOP STUDENTS
+function renderTopStudents(){
+  topList.innerHTML='';
+  const top = [...students].sort((a,b)=> (b.score||0)-(a.score||0)).slice(0,10);
+  top.forEach((s,index)=>{
+    topList.innerHTML+=`
+      <div class="card hover-card">
+        <b>${index+1}. ${s.name}</b>
+        <p>${s.teacher}</p>
+        <p class="text-yellow-500">Ball: ${s.score||0}</p>
+      </div>`;
+  })
+}
+</script>
+</body>
+</html>
